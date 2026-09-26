@@ -1,0 +1,67 @@
+-- Core executive measures
+Net Revenue :=
+SUM ( fact_sales[LineRevenue] )
+
+Orders :=
+DISTINCTCOUNT ( fact_sales[InvoiceNo] )
+
+Units Sold :=
+SUM ( fact_sales[Quantity] )
+
+Active Customers :=
+CALCULATE (
+    DISTINCTCOUNT ( fact_sales[CustomerID] ),
+    NOT ISBLANK ( fact_sales[CustomerID] )
+)
+
+Average Order Value :=
+DIVIDE ( [Net Revenue], [Orders] )
+
+Revenue per Customer :=
+DIVIDE ( [Net Revenue], [Active Customers] )
+
+Average Selling Price :=
+DIVIDE ( [Net Revenue], [Units Sold] )
+
+-- Time intelligence requires a marked dim_date table related to
+-- fact_sales[InvoiceDateKey].
+Previous Month Revenue :=
+CALCULATE (
+    [Net Revenue],
+    DATEADD ( dim_date[Date], -1, MONTH )
+)
+
+Monthly Revenue Change :=
+[Net Revenue] - [Previous Month Revenue]
+
+Monthly Revenue Change % :=
+DIVIDE ( [Monthly Revenue Change], [Previous Month Revenue] )
+
+Revenue YTD :=
+TOTALYTD ( [Net Revenue], dim_date[Date] )
+
+-- Customer concentration
+Top 10 Customer Revenue :=
+SUMX (
+    TOPN (
+        10,
+        SUMMARIZE (
+            fact_sales,
+            fact_sales[CustomerID],
+            "CustomerRevenue", [Net Revenue]
+        ),
+        [CustomerRevenue],
+        DESC
+    ),
+    [CustomerRevenue]
+)
+
+Top 10 Customer Revenue % :=
+DIVIDE ( [Top 10 Customer Revenue], [Net Revenue] )
+
+-- Data freshness
+Latest Transaction Date :=
+MAX ( fact_sales[InvoiceDate] )
+
+Days Since Latest Transaction :=
+DATEDIFF ( [Latest Transaction Date], TODAY (), DAY )
