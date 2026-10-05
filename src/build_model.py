@@ -67,15 +67,16 @@ def clean_transactions(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]
 
 
 def quantile_score(series: pd.Series, higher_is_better: bool = True) -> pd.Series:
-    """Assign stable one-to-five quantile scores."""
-    ranked = series.rank(method="first")
+    """Score equal values equally, independent of input row order."""
+    ranked = series.rank(method="average")
     bins = min(5, len(ranked))
-    if bins < 2:
+    if bins < 2 or ranked.nunique() < 2:
         return pd.Series(3, index=series.index, dtype="int64")
-    labels = list(range(1, bins + 1))
-    scores = pd.qcut(ranked, q=bins, labels=labels).astype(int)
-    if bins < 5:
-        scores = ((scores - 1) * 4 / (bins - 1) + 1).round().astype(int)
+    scores = pd.qcut(ranked, q=bins, labels=False, duplicates="drop")
+    actual_bins = int(scores.max()) + 1
+    if actual_bins < 2:
+        return pd.Series(3, index=series.index, dtype="int64")
+    scores = (scores * 4 / (actual_bins - 1) + 1).round().astype(int)
     return scores if higher_is_better else 6 - scores
 
 
@@ -96,7 +97,8 @@ def build_rfm(sales: pd.DataFrame) -> pd.DataFrame:
             ]
         )
 
-    snapshot_date = customer_sales["InvoiceDate"].max().normalize() + pd.Timedelta(days=1)
+    # Unknown-customer purchases still advance the observation window.
+    snapshot_date = sales["InvoiceDate"].max().normalize() + pd.DateOffset(days=1)
     rfm = (
         customer_sales.groupby("CustomerID")
         .agg(
