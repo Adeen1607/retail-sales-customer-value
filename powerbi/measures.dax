@@ -1,4 +1,5 @@
 -- Core executive measures
+-- Legacy name: revenue from positive sales only, not net of returns.
 Net Revenue :=
 SUM ( fact_sales[LineRevenue] )
 
@@ -45,13 +46,18 @@ Top 10 Customer Revenue :=
 SUMX (
     TOPN (
         10,
-        SUMMARIZE (
-            fact_sales,
-            fact_sales[CustomerID],
-            "CustomerRevenue", [Net Revenue]
+        FILTER (
+            SUMMARIZE (
+                fact_sales,
+                fact_sales[CustomerID],
+                "CustomerRevenue", [Net Revenue]
+            ),
+            NOT ISBLANK ( fact_sales[CustomerID] )
         ),
         [CustomerRevenue],
-        DESC
+        DESC,
+        fact_sales[CustomerID],
+        ASC
     ),
     [CustomerRevenue]
 )

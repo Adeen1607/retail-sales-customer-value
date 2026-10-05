@@ -2,6 +2,14 @@
 
 A business-intelligence case study that converts transaction-level retail data into a clean reporting model for revenue, order quality, customer value, product performance, and geographic trends.
 
+![Positive-sales revenue by month and known customers by RFM segment](docs/retail-preview.svg)
+
+## Verified pipeline snapshot
+
+A full run on the official UCI workbook produces **530,104 valid sales lines**, **19,960 distinct invoices**, and **4,338 known customers**. Positive-sales revenue is **£10,666,684.54** before any deduction for returns. Records cover 1 December 2010 through 9 December 2011; the final month is partial and is marked in the preview.
+
+These figures describe this pipeline's documented exclusions, not the retailer's audited net revenue. The preview is generated from the reporting tables, not a mock dashboard.
+
 ## Business questions
 
 - How are net revenue, order volume, units sold, and average order value changing over time?
@@ -48,12 +56,25 @@ pip install -r requirements.txt
 
 python src/download_data.py
 python src/build_model.py
-pytest
+python -m pytest -q
 ```
 
 On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1`.
 
-## Dashboard pages
+To run `notebooks/key_visuals.ipynb`, install `pip install -r requirements-visuals.txt` in your notebook environment after building the reporting tables. Start the notebook with `notebooks/` as its working directory.
+
+To regenerate the committed preview after building the model:
+
+```bash
+pip install -r requirements-visuals.txt
+python src/render_preview.py
+```
+
+Tests use local fixtures and run without downloading the workbook. Start with [KPI definitions](docs/KPI_DEFINITIONS.md) to understand exclusions, RFM scoring and reporting denominators. The legacy `NetRevenue` field and `[Net Revenue]` measure represent positive-sales revenue; they do not deduct returns.
+
+## Dashboard design
+
+The repository provides reporting tables, model specifications and DAX definitions. The following pages are a report design; a finished `.pbix` dashboard is not included.
 
 1. **Executive overview** — net revenue, orders, customers, units, average order value, and monthly trend.
 2. **Customer value** — RFM segments, repeat-customer rate, revenue concentration, and reactivation candidates.
