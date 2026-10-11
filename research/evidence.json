@@ -1,0 +1,15 @@
+{
+  "repository": "Adeen1607/retail-sales-customer-value",
+  "review_date": "2026-10-11",
+  "evidence_note": "Fresh pipeline execution on 11 October 2026. The **13 monthly reporting buckets** contain aggregate net revenue of **10,666,684.54 GBP**. The customer RFM table contains **4,338 identified customers**. These totals follow the cleaning and return rules in src/build_model.py. The first and last buckets are incomplete calendar months and should not be used as comparable growth endpoints.\n\n| Measure | Value |\n|---|---:|\n| monthly buckets | 13 |\n| net revenue GBP | 10666684.5440 |\n| identified RFM customers | 4338 |\n\n",
+  "inputs": [
+    {
+      "path": "notebooks/key_visuals.ipynb",
+      "sha256": "070ca61b5c0fab2862d5b779688dbc837f299c49a591efd197a012a60401d6dc"
+    },
+    {
+      "path": "reports/aggregate-summary.csv",
+      "sha256": "c52c2a59e1dc05f9ad0a5c0c51cf7b99c19048e7b34a33e7176626f3872a480e"
+    }
+  ]
+}

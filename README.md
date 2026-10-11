@@ -64,3 +64,32 @@ On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1
 ## Responsible interpretation
 
 The dataset represents one retailer and one historical period. Customer identifiers are incomplete for some transactions, product descriptions are operational rather than standardized catalogue labels, and cancellation codes require explicit treatment. Findings demonstrate analytical workflow design and should not be generalized to the wider retail market.
+
+
+## Rebuild the reading edition
+
+```bash
+python -m pip install -r requirements-research.txt
+python scripts/build_research_site.py
+```
+
+This renders saved notebook outputs without rerunning model training or external APIs. To refresh findings, run the analysis commands above first, update `reports/research-findings.md`, and rebuild.
+
+<!-- research-edition:start -->
+## Research edition
+
+[Research report and final visual results](research/report.md) · [Browser-ready notebook catalogue](research/notebooks.html)
+
+Fresh pipeline execution on 11 October 2026. The **13 monthly reporting buckets** contain aggregate net revenue of **10,666,684.54 GBP**. The customer RFM table contains **4,338 identified customers**. These totals follow the cleaning and return rules in src/build_model.py. The first and last buckets are incomplete calendar months and should not be used as comparable growth endpoints.
+
+| Measure | Value |
+|---|---:|
+| monthly buckets | 13 |
+| net revenue GBP | 10666684.5440 |
+| identified RFM customers | 4338 |
+
+
+
+The `research/` folder contains a professional static reading edition. The Pages workflow deploys it after GitHub Pages is enabled with **GitHub Actions** as the publishing source. Intended URL: `https://adeen1607.github.io/retail-sales-customer-value/`. Deployment status must be checked in Actions before treating that address as live.
+
+<!-- research-edition:end -->
