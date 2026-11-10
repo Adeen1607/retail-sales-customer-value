@@ -128,6 +128,23 @@ def build_rfm(sales: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def summarize_segments(rfm: pd.DataFrame) -> pd.DataFrame:
+    """Summarize customer counts and value by RFM segment."""
+    columns = ["Segment", "Customers", "TotalRevenue", "AverageRevenue"]
+    if rfm.empty:
+        return pd.DataFrame(columns=columns)
+    return (
+        rfm.groupby("Segment", as_index=False)
+        .agg(
+            Customers=("CustomerID", "nunique"),
+            TotalRevenue=("MonetaryValue", "sum"),
+            AverageRevenue=("MonetaryValue", "mean"),
+        )
+        .sort_values("TotalRevenue", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
 def build_tables(workbook: Path, output_dir: Path) -> None:
     raw = pd.read_excel(workbook)
     sales, exclusions = clean_transactions(raw)
@@ -169,12 +186,14 @@ def build_tables(workbook: Path, output_dir: Path) -> None:
     )
     country["AverageOrderValue"] = country["NetRevenue"] / country["Orders"]
 
+    rfm = build_rfm(sales)
     tables = {
         "fact_sales.csv": sales,
         "monthly_kpis.csv": monthly,
         "product_performance.csv": product,
         "country_performance.csv": country,
-        "customer_rfm.csv": build_rfm(sales),
+        "customer_rfm.csv": rfm,
+        "customer_segment_summary.csv": summarize_segments(rfm),
         "data_quality_exclusions.csv": exclusions,
     }
     for filename, table in tables.items():
