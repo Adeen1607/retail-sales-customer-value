@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.build_model import build_rfm, clean_transactions
+from src.build_model import build_rfm, clean_transactions, summarize_segments
 
 
 def sample_transactions() -> pd.DataFrame:
@@ -46,3 +46,20 @@ def test_rfm_is_customer_grained() -> None:
     customer_one = rfm.set_index("CustomerID").loc[1]
     assert customer_one["Frequency"] == 1
     assert customer_one["MonetaryValue"] == 25.0
+
+
+def test_segment_summary_counts_customers_and_revenue() -> None:
+    sales, _ = clean_transactions(sample_transactions())
+    summary = summarize_segments(build_rfm(sales))
+    assert summary["Customers"].sum() == 2
+    assert summary["TotalRevenue"].sum() == 32.0
+    assert summary["AverageRevenue"].notna().all()
+
+
+def test_segment_summary_handles_empty_customers() -> None:
+    empty = build_rfm(pd.DataFrame(columns=["CustomerID"]))
+    summary = summarize_segments(empty)
+    assert summary.empty
+    assert list(summary.columns) == [
+        "Segment", "Customers", "TotalRevenue", "AverageRevenue"
+    ]
